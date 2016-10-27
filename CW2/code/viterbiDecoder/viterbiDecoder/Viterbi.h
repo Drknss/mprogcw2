@@ -13,9 +13,9 @@ struct schange {
 class Viterbi
 {
 public:
-	Viterbi(string perm);
+	Viterbi(int r3, int r2, int r1, int i1, int xorc1, int xorc2);
 	//string runviterbi();
-	void generateTrellace(string perm);
+	void generateTrellace(int r3, int r2, int r1, int i1, int xorc1, int xorc2);
 	string decode(string file);
 	string xorgate(char a, char b);
 	string xorgate(char a, char b, char c);

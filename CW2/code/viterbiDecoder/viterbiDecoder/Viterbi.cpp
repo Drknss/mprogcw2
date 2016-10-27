@@ -1,25 +1,10 @@
 #include "Viterbi.h"
 
-Viterbi::Viterbi(string perm)
+Viterbi::Viterbi(int r3, int r2, int r1, int i1, int xorc1, int xorc2)
 {
-	generateTrellace(perm);
 	state = "000";
-}
-
-void Viterbi::generateTrellace(string perm) {
-	int count = 0;
-	for each (string i in ids) {
-		stateChanges[count].id = i;
-		stateChanges[count].sto[0] = sto[count][0];
-		stateChanges[count].sto[1] = sto[count][1];
-		string temp0 = "0" + i;
-		string temp1 = "1" + i;
-		stateChanges[count].bit[0] = xorgate(temp0[perm[3] - 48], temp0[perm[2] - 48]) + xorgate(temp0[perm[1] - 48], temp0[perm[0] - 48]);
-		stateChanges[count].bit[1] = xorgate(temp1[perm[3] - 48], temp1[perm[2] - 48]) + xorgate(temp1[perm[1] - 48], temp1[perm[0] - 48]);
-
-		cout << "For ID; " << i << " Input 0 = " << stateChanges[count].bit[0] << " And Input 1 = " << stateChanges[count].bit[1] << endl;
-		count++;
-	}
+	generateTrellace(r3,r2,r1,i1,xorc1,xorc2);
+	
 }
 
 string Viterbi::xorgate(char a, char b) {
@@ -27,17 +12,44 @@ string Viterbi::xorgate(char a, char b) {
 }
 
 string Viterbi::xorgate(char a, char b, char c) {
-	int ta = ((int)a + (int)b) % 2;
+	int ta = (((int)a + (int)b) % 2);
 	int tb = (ta + (int)c) % 2;
 	return to_string(tb);
+}
+
+void Viterbi::generateTrellace(int r3, int r2, int r1, int i1, int xorc1, int xorc2) {
+	int count = 0;
+	for each (string i in ids) {
+		stateChanges[count].id = i;		
+		for (int s = 0; s < 2; s++) {
+			stateChanges[count].sto[s] = sto[count][s];
+			string temp = to_string(s) + i;
+			if (xorc1 == 2 && xorc2 == 2) {
+				stateChanges[count].bit[s] += xorgate((char)temp[i1], (char)temp[r1]) + xorgate((char)temp[r2], (char)temp[r3]);
+				}
+			if (xorc1 == 3 && xorc2 == 2) {
+				stateChanges[count].bit[s] += xorgate((char)temp[i1], (char)temp[r1], (char)temp[r2]) + xorgate((char)temp[r2], (char)temp[r3]);
+			}
+			if (xorc1 == 2 && xorc2 == 3) {
+				stateChanges[count].bit[s] += xorgate((char)temp[i1], (char)temp[r1]) + xorgate((char)temp[r1], (char)temp[r2], (char)temp[r3]);
+			}
+			if (xorc1 == 3 && xorc2 == 3) {
+				stateChanges[count].bit[s] += xorgate((char)temp[i1], (char)temp[r1], (char)temp[r2]) + xorgate((char)temp[r1], (char)temp[r2], (char)temp[r3]);
+			}
+		}
+		cout << "For ID; " << i << " Input 0 = " << stateChanges[count].bit[0] << " And Input 1 = " << stateChanges[count].bit[1] << endl;
+		count++;
+	}
+	cout << endl;
 }
 
 string Viterbi::decode(string file) {
 	string decoded;
 	string cState = state;
+	int count = 0;
 	for (int i = 0; i < file.length(); i+=2) {
 		string temp = file.substr(i,2);
-		int count = 0;
+		
 		for each(schange s in stateChanges) {
 			if (s.id == cState) {
 				break;
@@ -48,35 +60,23 @@ string Viterbi::decode(string file) {
 		if (stateChanges[count].bit[0] == temp) {
 			decoded += "0";
 			cState = ids[stateChanges[count].sto[0]];
+			count = 0;
 		}
 		//next bit must be 1
 		else if (stateChanges[count].bit[1] == temp) {
 			decoded += "1";
 			cState = ids[stateChanges[count].sto[1]];
+			count = 0;
 		}
 		else {
 			//error
-			cout << "Error";
+			string error = (" Decode Ran into an Error!! Current state is = " + cState + " Possible Outputs were = " + ids[stateChanges[count].sto[0]] + " For " + stateChanges[count].bit[0] + " and " + ids[stateChanges[count].sto[1]] + " for " + stateChanges[count].bit[1] + " Actual output was " + temp);
+			decoded += error;
 			break;
 		}
 	}
 	return decoded;
 }
-
-//string Viterbi::runviterbi() {
-//	for each() {
-//
-//	}
-//	for (int i = 0; i < T; i++) {
-//		for each(state) {
-//
-//		}
-//	}
-//	for (int i = 0; i < T; i++) {
-//
-//	}
-//	return x;
-//}
 
 Viterbi::~Viterbi()
 {

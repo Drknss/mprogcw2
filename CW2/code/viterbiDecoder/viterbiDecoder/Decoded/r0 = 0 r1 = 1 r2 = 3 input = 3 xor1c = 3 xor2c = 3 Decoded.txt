@@ -1,0 +1,1 @@
+00001 Decode Ran into an Error!! Current state is = 100 Possible Outputs were = 010 For 11 and 110 for 10 Actual output was 01
